@@ -1,0 +1,48 @@
+name: Build MotoCross Engine for Akai Force
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version number (for example 0.1.0)"
+        required: true
+        default: "0.1.0"
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Get MotoCross Engine source
+        uses: actions/checkout@v4
+      - name: Enable ARM container emulation
+        uses: docker/setup-qemu-action@v3
+      - name: Get official SD88 build kit
+        run: git clone --depth 1 https://github.com/sd88me/mpc-vst-plugins.git "$RUNNER_TEMP/mpc-vst-plugins"
+      - name: Build ARM VST and touchscreen skin
+        env:
+          MPC_VST: ${{ runner.temp }}/mpc-vst-plugins
+        run: |
+          chmod +x vst/build.sh
+          ./vst/build.sh
+      - name: Run host-side engine tests
+        run: |
+          "$RUNNER_TEMP/mpc-vst-plugins/tools/test_port.sh" vst/vst.json
+      - name: Package install ZIP
+        env:
+          MPC_VST: ${{ runner.temp }}/mpc-vst-plugins
+          VERSION: ${{ inputs.version }}
+        run: |
+          python3 "$MPC_VST/tools/release.py" \
+            --so "vst/build/motocross_engine.so" \
+            --skin "vst/build/skin/BenjaLab - VST - MotoCross Engine" \
+            --entry "vst/build/pluginlist-entry.xml" \
+            --version "$VERSION" \
+            --about "Synthetic motocross engine instrument with throttle, engine type and displacement controls." \
+            -o dist
+      - name: Upload install ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: MotoCross-Engine-Force-${{ inputs.version }}
+          path: dist/*.zip
+          if-no-files-found: error
+          retention-days: 30
