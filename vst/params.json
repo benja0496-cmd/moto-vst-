@@ -1,0 +1,37 @@
+[
+  {
+    "key": "throttle",
+    "name": "Throttle",
+    "unit": "%",
+    "min": 0,
+    "max": 100,
+    "default": 18
+  },
+  {
+    "key": "engine",
+    "name": "Engine",
+    "options": [
+      "2-stroke",
+      "4-stroke"
+    ],
+    "default": "2-stroke"
+  },
+  {
+    "key": "cc",
+    "name": "Displacement",
+    "options": [
+      "125 cc",
+      "250 cc",
+      "450 cc"
+    ],
+    "default": "250 cc"
+  },
+  {
+    "key": "volume",
+    "name": "Volume",
+    "unit": "%",
+    "min": 0,
+    "max": 100,
+    "default": 35
+  }
+]
